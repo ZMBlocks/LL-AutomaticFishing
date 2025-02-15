@@ -6,6 +6,7 @@
     "author": "ZMBlocks",
     "description": "free your hands and fish automatically",
     "extraInfo": {
-        "sentryDsn": "https://56e5573f4627a18b3b4333a40e8dcfe1@o4508796501819392.ingest.de.sentry.io/4508807000555600"
+        "sentryDsn": "https://56e5573f4627a18b3b4333a40e8dcfe1@o4508796501819392.ingest.de.sentry.io/4508807000555600",
+        "sentryUploadType": "sus"
     }
 }
