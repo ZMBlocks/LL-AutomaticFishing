@@ -1,6 +1,8 @@
 #include "Entry.h"
+#include <ll/api/chrono/GameChrono.h>
 #include <ll/api/memory/Hook.h>
 #include <ll/api/mod/RegisterHelper.h>
+#include <ll/api/thread/ServerThreadExecutor.h>
 #include <mc/network/packet/InventorySlotPacket.h>
 #include <mc/world/actor/FishingHook.h>
 #include <mc/world/actor/player/Player.h>
@@ -15,7 +17,9 @@ LL_TYPE_INSTANCE_HOOK(FishingHookedHook, HookPriority::Normal, FishingHook, &Fis
             auto& item = const_cast<ItemStack&>(player->getSelectedItem());
             item.getItem()->use(item, *player);
             if (!item.isNull()) item.getItem()->use(item, *player);
-            InventorySlotPacket(ContainerID::Inventory, player->getSelectedItemSlot(), item).sendTo(*player);
+            ll::thread::ServerThreadExecutor::getDefault().execute([player, &item]() -> void {
+                InventorySlotPacket(ContainerID::Inventory, player->getSelectedItemSlot(), item).sendTo(*player);
+            });
         }
     }
     return result;
