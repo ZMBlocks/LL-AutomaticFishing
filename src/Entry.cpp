@@ -1,5 +1,4 @@
 #include "Entry.h"
-#include <ll/api/chrono/GameChrono.h>
 #include <ll/api/memory/Hook.h>
 #include <ll/api/mod/RegisterHelper.h>
 #include <ll/api/thread/ServerThreadExecutor.h>
@@ -10,19 +9,19 @@
 
 namespace AutomaticFishing {
 
-LL_TYPE_INSTANCE_HOOK(FishingHookedHook, HookPriority::Normal, FishingHook, &FishingHook::_serverHooked, bool) {
+LL_TYPE_INSTANCE_HOOK(FishingHookedHook, HookPriority::Normal, FishingHook, &FishingHook::_serverHooked, bool) try {
     auto result = origin();
-    if (result && !mTimeUntilHooked) {
-        if (auto* player = this->getPlayerOwner()) {
-            auto& item = const_cast<ItemStack&>(player->getSelectedItem());
-            item.getItem()->use(item, *player);
-            if (!item.isNull()) item.getItem()->use(item, *player);
-            ll::thread::ServerThreadExecutor::getDefault().execute([player, &item]() -> void {
-                InventorySlotPacket(ContainerID::Inventory, player->getSelectedItemSlot(), item).sendTo(*player);
-            });
-        }
-    }
+    if (!result || mTimeUntilHooked) return result;
+    auto* player = getPlayerOwner();
+    auto& item   = const_cast<ItemStack&>(player->getSelectedItem());
+    item.getItem()->use(item, *player);
+    if (!item.isNull()) item.getItem()->use(item, *player);
+    ll::thread::ServerThreadExecutor::getDefault().execute([player, &item]() -> void {
+        InventorySlotPacket(ContainerID::Inventory, player->getSelectedItemSlot(), item).sendTo(*player);
+    });
     return result;
+} catch (...) {
+    return origin();
 }
 
 Entry& Entry::getInstance() {
